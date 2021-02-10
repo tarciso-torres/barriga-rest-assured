@@ -6,9 +6,32 @@ import static org.hamcrest.Matchers.*;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.junit.Before;
 import org.junit.Test;
 
-public class BarrigaTest {
+import br.ce.redfort.rest.core.BaseTest;
+
+public class BarrigaTest extends BaseTest{
+	
+	private String TOKEN;
+	
+	@Before
+	public void login() {
+		
+		Map<String, String> login = new HashMap<String, String>();
+		login.put("email", "tarciso.test@test.com");
+		login.put("senha", "123456");
+		
+		TOKEN = given()
+			.body(login)
+		.when()
+			.post("/signin")
+		.then()
+			.statusCode(200)
+			.extract().path("token")
+		;
+		
+	}
 	
 	@Test
 	public void naoDeveAcessarAPISemToken() {
@@ -22,29 +45,30 @@ public class BarrigaTest {
 	
 	@Test
 	public void deveIncluirContaComSucesso() {
-		Map<String, String> login = new HashMap<String, String>();
-		login.put("email", "tarciso.test@test.com");
-		login.put("senha", "123456");
-		
-		String token = given()
-			.body(login)
-		.when()
-			.post("/signin")
-		.then()
-			.statusCode(200)
-			.extract().path("token")
-		;
 		
 		given()
-			.header("Authorization", "JWT " + token)
+			.header("Authorization", "JWT " + TOKEN)
 			.body("{\"nome\": \"Nome Qualquer\"}")
 		.when()
 			.post("/contas")
 		.then()
-		.log().all()
 			.statusCode(201)
 			.body("nome", is("Nome Qualquer"))
 			.body("visivel", is(true))
+		;
+	}
+	
+	@Test
+	public void deveAlterarContaComSucesso() {
+		
+		given()
+			.header("Authorization", "JWT " + TOKEN)
+			.body("{\"nome\": \"Nome Alterado\"}")
+		.when()
+			.put("/contas/406087")
+		.then()
+			.statusCode(200)
+			.body("nome", is("Nome Alterado"))
 		;
 	}
 
