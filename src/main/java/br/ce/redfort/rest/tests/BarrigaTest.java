@@ -85,5 +85,29 @@ public class BarrigaTest extends BaseTest{
 			.body("error", is("Já existe uma conta com esse nome!"))
 		;
 	}
+	
+	@Test
+	public void deveInserirMovimentacaoComSucesso() {
+		
+		Movimentacao mov = new Movimentacao();
+		mov.setConta_id(406087);
+		mov.setDescricao("Descricao da movimentacao");
+		mov.setEnvolvido("Envolvido na mov");
+		mov.setTipo("REC");
+		mov.setData_transacao("01/01/2000");
+		mov.setData_pagamento("01/05/2010");
+		mov.setValor(100f);
+		mov.setStatus(true);
+		
+		given()
+			.header("Authorization", "JWT " + TOKEN)
+			.body(mov)
+		.when()
+			.post("/transacoes")
+		.then()
+			.log().all()
+			.statusCode(201)
+		;
+	}
 
 }
